@@ -256,6 +256,38 @@
       touch-action: none;
     }
 
+    /* Scratch Demo Hint Overlay */
+    .scratch-demo-hint {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 3;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #ffffff;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      animation: swipeDemo 1.8s infinite ease-in-out;
+      transition: opacity 0.4s ease;
+    }
+
+    .scratch-demo-hint i {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+
+    @keyframes swipeDemo {
+      0%, 100% { transform: translate(-50%, -50%) scale(0.95) rotate(-5deg); }
+      50% { transform: translate(-30%, -40%) scale(1.1) rotate(10deg); }
+    }
+
     .scratch-reveal-content {
       position: absolute;
       top: 0;
@@ -472,11 +504,11 @@
 </head>
 <body>
 
-  <!-- Audio Control Button -->
+  <!-- Audio Control Button (No loop attribute applied) -->
   <button id="audio-control" onclick="toggleAudio()">
     <i id="audio-icon" class="fas fa-music"></i>
   </button>
-  <audio id="bg-music" loop src="weddingsong.mp3" preload="auto" playsinline webkit-playsinline></audio>
+  <audio id="bg-music" src="weddingsong.mp3" preload="auto" playsinline webkit-playsinline></audio>
 
   <div id="bg-canvas-container">
     <video id="bg-video-main" class="bg-media active" autoplay loop muted playsinline webkit-playsinline preload="auto">
@@ -512,6 +544,10 @@
         <h2 class="section-title">Scratch to Reveal</h2>
         <div class="scratch-container">
           <canvas id="scratch-canvas" width="180" height="160"></canvas>
+          <div class="scratch-demo-hint" id="scratch-hint">
+            <i class="fas fa-hand-pointer"></i>
+            <span>Scratch Here</span>
+          </div>
           <div class="scratch-reveal-content">
             <i class="fas fa-calendar-heart" style="font-size:1.2rem; color:var(--text-burgundy); margin-bottom:4px;"></i>
             <h3>Nikah Ceremony</h3>
@@ -532,7 +568,6 @@
         </div>
       </section>
 
-      <!-- Events Schedule Section (Without White Box & Large Dates) -->
       <section class="invitation-section" data-bg="bg-video-main">
         <h2 class="section-title">Events Schedule</h2>
         
@@ -582,6 +617,11 @@
     const bgMusic = document.getElementById('bg-music');
     const mainBgVid = document.getElementById('bg-video-main');
     let isOpened = false;
+
+    // Explicitly disable looping so music plays exactly once
+    if (bgMusic) {
+      bgMusic.loop = false;
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
       if (mainBgVid) {
@@ -681,9 +721,10 @@
       if (firstSection) firstSection.classList.add('animate-in');
     }
 
-    // Scratch Card Logic & Party Bomber
+    // Scratch Card Logic, Demo Hint Hide & Party Bomber Effect
     const canvas = document.getElementById('scratch-canvas');
     const ctx = canvas.getContext('2d');
+    const scratchHint = document.getElementById('scratch-hint');
     let confettiTriggered = false;
 
     function initGlitter() {
@@ -760,6 +801,12 @@
 
     function scratch(e) {
       if (!isScratching) return;
+
+      // Hide demo hint on first scratch action
+      if (scratchHint && scratchHint.style.opacity !== '0') {
+        scratchHint.style.opacity = '0';
+      }
+
       const rect = canvas.getBoundingClientRect();
       const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
       const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;

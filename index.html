@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Wedding Invitation | Amzad & Romana</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    :root {
+      --text-burgundy: #5a0e17;
+      --text-black: #000000;
+      --accent-maroon: #8b263e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: 'Cormorant Garamond', serif;
+      background: #fdfbf7;
+      color: var(--text-black);
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* Fixed Canvas Background Layer */
+    #bg-canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      overflow: hidden;
+      pointer-events: none;
+      background: #fdfbf7;
+    }
+
+    .bg-media {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      display: block;
+      opacity: 0;
+      transition: opacity 0.8s ease-in-out;
+      will-change: opacity;
+    }
+
+    .bg-media.active {
+      opacity: 1;
+    }
+
+    /* Envelope Intro Screen with Cover Image Fallback */
+    #envelope-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+      background: url('cover.jpg') no-repeat center center / cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: opacity 0.8s ease, visibility 0.8s;
+      overflow: hidden;
+    }
+
+    #envelope-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #envelope-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    #envelope-video.playing {
+      opacity: 1;
+    }
+
+    /* Main Content Layout */
+    #main-content {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      margin: 0 auto;
+      padding-top: 75px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    #main-content.visible {
+      opacity: 1;
+    }
+
+    .content-wrapper {
+      width: 90%;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    .invitation-section {
+      width: 100%;
+      margin-bottom: 35px;
+      position: relative;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+
+    .invitation-section.animate-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hero-heart {
+      font-size: 1.1rem;
+      color: var(--text-burgundy);
+      margin-bottom: 6px;
+    }
+
+    .bismillah-text {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.2rem;
+      color: var(--text-black);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .welcome-text {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 0.95rem;
+      line-height: 1.35;
+      color: var(--text-black);
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .couple-name {
+      font-family: 'Great Vibes', cursive;
+      font-size: 3.4rem;
+      font-weight: 600;
+      color: var(--text-burgundy);
+      line-height: 1;
+      margin: 2px 0;
+    }
+
+    /* Styled 'A' Letter Class */
+    .styled-letter-a {
+      font-family: 'Alex Brush', cursive;
+      font-size: 4.6rem;
+      line-height: 0.8;
+      display: inline-block;
+      margin-right: -6px;
+      vertical-align: middle;
+      font-weight: 400;
+    }
+
+    .ampersand {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.5rem;
+      color: var(--accent-maroon);
+      margin: 2px 0;
+      font-weight: 700;
+    }
+
+    .scroll-indicator {
+      margin-top: 18px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-black);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-weight: 700;
+    }
+
+    .scroll-indicator i {
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(5px); }
+      60% { transform: translateY(2px); }
+    }
+
+    .section-title {
+      font-family: 'Great Vibes', cursive;
+      font-size: 2.6rem;
+      color: var(--text-burgundy);
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    /* Scratch Container */
+    .scratch-container {
+      position: relative;
+      width: 180px;
+      height: 160px;
+      margin: 10px auto;
+      clip-path: path('M 90 150 C 90 150 10 100 10 50 C 10 20 30 5 55 5 C 70 5 82 12 90 22 C 98 12 110 5 125 5 C 150 5 170 20 170 50 C 170 100 90 150 90 150 Z');
+    }
+
+    #scratch-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    .scratch-reveal-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 10px;
+    }
+
+    .scratch-reveal-content h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      color: var(--text-burgundy);
+      margin-bottom: 2px;
+      font-weight: 700;
+    }
+
+    .save-the-date-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--text-burgundy);
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-top: 10px;
+      border: none;
+    }
+
+    .countdown-grid {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .countdown-box {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      padding: 8px 6px;
+      min-width: 52px;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .countdown-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-burgundy);
+    }
+
+    .countdown-label {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-black);
+      margin-top: 2px;
+      font-weight: 700;
+    }
+
+    .event-card {
+      margin-bottom: 16px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 14px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .event-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      color: var(--text-burgundy);
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .event-details {
+      font-size: 0.9rem;
+      color: var(--text-black);
+      line-height: 1.4;
+      font-weight: 600;
+    }
+
+    /* Clean Direct Map Section */
+    .map-clean-wrapper {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .map-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-burgundy);
+      margin-bottom: 2px;
+    }
+
+    .map-address {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.8rem;
+      color: var(--text-black);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .map-frame {
+      width: 100%;
+      height: 190px;
+      border-radius: 12px;
+      border: none;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .venue-btn {
+      display: inline-block;
+      padding: 8px 18px;
+      background: var(--text-burgundy);
+      color: #fff;
+      border-radius: 18px;
+      text-decoration: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* Parallax CTA Banner with bg2.jpg */
+    .cta-parallax-banner {
+      width: 100%;
+      margin-top: 30px;
+      margin-bottom: 0 !important;
+      padding: 60px 15px;
+      position: relative;
+      background: #100406;
+      overflow: hidden;
+    }
+
+    .cta-parallax-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      z-index: 1;
+      opacity: 0.5;
+    }
+
+    .cta-content-box {
+      position: relative;
+      z-index: 2;
+    }
+
+    .footer-title {
+      font-family: 'Great Vibes', cursive;
+      font-size: 2.6rem;
+      color: var(--text-black);
+      line-height: 1.2;
+      margin-bottom: 8px;
+      font-weight: 600;
+      text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+    }
+
+    .footer-names {
+      font-family: 'Great Vibes', cursive;
+      font-size: 2.2rem;
+      color: var(--text-burgundy);
+      font-weight: 600;
+      text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+    }
+
+    #audio-control {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      z-index: 1000;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0,0,0,0.15);
+      color: var(--text-burgundy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Audio Control Button (Mute / Unmute) -->
+  <button id="audio-control" onclick="toggleAudio()">
+    <i id="audio-icon" class="fas fa-music"></i>
+  </button>
+  <audio id="bg-music" loop src="weddingsong.mp3" preload="auto" playsinline webkit-playsinline></audio>
+
+  <div id="bg-canvas-container">
+    <video id="bg-video-main" class="bg-media active" autoplay loop muted playsinline webkit-playsinline preload="auto">
+      <source src="bg.mp4" type="video/mp4">
+    </video>
+    <img id="bg-img-1" class="bg-media" src="bg1.jpg" alt="Background">
+  </div>
+
+  <div id="envelope-screen">
+    <video id="envelope-video" muted playsinline webkit-playsinline preload="auto" poster="cover.jpg">
+      <source src="envelope.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <main id="main-content">
+    <div class="content-wrapper">
+      <section class="invitation-section" data-bg="bg-video-main">
+        <div class="hero-heart"><i class="fas fa-heart"></i></div>
+        <div class="bismillah-text">In the Name of Allah</div>
+        <p class="welcome-text">We are honored to welcome you to<br>the Wedding ceremony of..</p>
+
+        <h1 class="couple-name"><span class="styled-letter-a">A</span>mzad</h1>
+        <div class="ampersand">&</div>
+        <h1 class="couple-name">Romana</h1>
+
+        <div class="scroll-indicator">
+          <span>SCROLL DOWN</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+      </section>
+
+      <section class="invitation-section" data-bg="bg-video-main">
+        <h2 class="section-title">Scratch to Reveal</h2>
+        <div class="scratch-container">
+          <canvas id="scratch-canvas" width="180" height="160"></canvas>
+          <div class="scratch-reveal-content">
+            <i class="fas fa-calendar-heart" style="font-size:1.2rem; color:var(--text-burgundy); margin-bottom:4px;"></i>
+            <h3>Nikah Ceremony</h3>
+            <p style="font-size:0.85rem; font-weight:700; color:var(--text-black);">23 October 2026</p>
+            <p style="font-size:0.7rem; color:var(--text-black); margin-top:2px; font-weight:600;">Save The Date</p>
+          </div>
+        </div>
+        <button class="save-the-date-btn"><i class="far fa-calendar-plus"></i> SAVE THE DATE</button>
+      </section>
+
+      <section class="invitation-section" data-bg="bg-video-main">
+        <h2 class="section-title" style="font-size: 2rem;">Counting Down to Forever</h2>
+        <div class="countdown-grid">
+          <div class="countdown-box"><div id="cd-days" class="countdown-value">00</div><div class="countdown-label">Days</div></div>
+          <div class="countdown-box"><div id="cd-hours" class="countdown-value">00</div><div class="countdown-label">Hours</div></div>
+          <div class="countdown-box"><div id="cd-mins" class="countdown-value">00</div><div class="countdown-label">Mins</div></div>
+          <div class="countdown-box"><div id="cd-secs" class="countdown-value">00</div><div class="countdown-label">Secs</div></div>
+        </div>
+      </section>
+
+      <section class="invitation-section" data-bg="bg-video-main">
+        <h2 class="section-title">Events Schedule</h2>
+        <div class="event-card">
+          <h3 class="event-name">Nikah Ceremony</h3>
+          <p class="event-details"><i class="far fa-calendar-alt"></i> 23 October 2026</p>
+          <p class="event-details"><i class="far fa-clock"></i> Evening Ceremony</p>
+        </div>
+        <div class="event-card">
+          <h3 class="event-name">Walima Reception</h3>
+          <p class="event-details"><i class="far fa-calendar-alt"></i> 25 October 2026</p>
+          <p class="event-details"><i class="far fa-clock"></i> Evening Onwards</p>
+        </div>
+      </section>
+
+      <section class="invitation-section" data-bg="bg-img-1">
+        <h2 class="section-title">Venue & Location</h2>
+        <div class="map-clean-wrapper">
+          <h3 class="map-title">Green Valley Farm House Lawn 2</h3>
+          <p class="map-address"><i class="fas fa-map-marker-alt"></i> Venue for Nikah Ceremony</p>
+          <iframe class="map-frame" src="https://maps.google.com/maps?q=28.699318166088975,77.34366397245725&t=h&z=17&output=embed" allowfullscreen="" loading="lazy"></iframe>
+          <a href="https://www.google.com/maps?q=28.699318166088975,77.34366397245725&t=h" target="_blank" class="venue-btn"><i class="fas fa-directions"></i> Open in Google Maps</a>
+        </div>
+        <div class="map-clean-wrapper">
+          <h3 class="map-title">Kaka Palace</h3>
+          <p class="map-address"><i class="fas fa-map-marker-alt"></i> Venue for Walima Reception</p>
+          <iframe class="map-frame" src="https://maps.google.com/maps?q=28.72403565615448,77.33706040096709&t=h&z=17&output=embed" allowfullscreen="" loading="lazy"></iframe>
+          <a href="https://www.google.com/maps?q=28.72403565615448,77.33706040096709&t=h" target="_blank" class="venue-btn"><i class="fas fa-directions"></i> Open in Google Maps</a>
+        </div>
+      </section>
+    </div>
+
+    <section class="invitation-section cta-parallax-banner">
+      <img class="cta-parallax-bg" src="bg2.jpg" alt="Bottom Banner Parallax">
+      <div class="cta-content-box">
+        <h2 class="footer-title">We can't wait to celebrate<br>with you!</h2>
+        <p class="footer-names"><span class="styled-letter-a">A</span>mzad & Romana</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const envScreen = document.getElementById('envelope-screen');
+    const envVideo = document.getElementById('envelope-video');
+    const mainContent = document.getElementById('main-content');
+    const bgMusic = document.getElementById('bg-music');
+    const mainBgVid = document.getElementById('bg-video-main');
+    let isOpened = false;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (mainBgVid) {
+        mainBgVid.muted = true;
+        mainBgVid.play().catch(() => {});
+      }
+      setupScrollAnimations();
+    });
+
+    function triggerEnvelopeOpen(e) {
+      if (e) e.preventDefault();
+      if (isOpened) return;
+
+      if (mainBgVid) {
+        mainBgVid.muted = true;
+        mainBgVid.play().catch(() => {});
+      }
+
+      if (envVideo) {
+        envVideo.classList.add('playing');
+        envVideo.muted = false; // Envelope sound play karega
+        const playEnv = envVideo.play();
+        if (playEnv !== undefined) {
+          playEnv.then(() => {
+            // Envelope animation playing
+          }).catch(() => {
+            revealMainCard();
+          });
+        }
+      }
+    }
+
+    envScreen.addEventListener('click', triggerEnvelopeOpen);
+    envScreen.addEventListener('touchstart', triggerEnvelopeOpen, { passive: false });
+
+    // Envelope Video ends -> Play Song & Show Card
+    envVideo.addEventListener('ended', revealMainCard);
+
+    function revealMainCard() {
+      if (isOpened) return;
+      isOpened = true;
+
+      // Envelope animation khatam hone par song play hoga
+      if (bgMusic) {
+        bgMusic.play().catch(e => console.log("Audio playback error:", e));
+      }
+
+      envScreen.classList.add('hidden');
+      setTimeout(() => {
+        mainContent.classList.add('visible');
+        triggerInitialAnimations();
+        if (mainBgVid) {
+          mainBgVid.play().catch(() => {});
+        }
+      }, 200);
+    }
+
+    function toggleAudio() {
+      const icon = document.getElementById('audio-icon');
+      if (!bgMusic) return;
+      if (bgMusic.paused) {
+        bgMusic.play();
+        icon.className = 'fas fa-music';
+      } else {
+        bgMusic.pause();
+        icon.className = 'fas fa-volume-mute';
+      }
+    }
+
+    function setupScrollAnimations() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-in');
+            const targetBgId = entry.target.getAttribute('data-bg');
+            if (targetBgId) switchBgMedia(targetBgId);
+          }
+        });
+      }, { threshold: 0.2 });
+
+      document.querySelectorAll('.invitation-section').forEach(section => {
+        observer.observe(section);
+      });
+    }
+
+    function switchBgMedia(activeId) {
+      document.querySelectorAll('.bg-media').forEach(media => {
+        if (media.id === activeId) {
+          media.classList.add('active');
+          if (media.tagName === 'VIDEO') {
+            media.play().catch(() => {});
+          }
+        } else {
+          media.classList.remove('active');
+        }
+      });
+    }
+
+    function triggerInitialAnimations() {
+      const firstSection = document.querySelector('.invitation-section');
+      if (firstSection) firstSection.classList.add('animate-in');
+    }
+
+    // Scratch Card Logic
+    const canvas = document.getElementById('scratch-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function initGlitter() {
+      const grad = ctx.createRadialGradient(
+        canvas.width / 2, canvas.height / 3, 10,
+        canvas.width / 2, canvas.height / 2, 110
+      );
+      grad.addColorStop(0, '#fce4ec');
+      grad.addColorStop(0.3, '#f48fb1');
+      grad.addColorStop(0.7, '#c2185b');
+      grad.addColorStop(1, '#6a1b29');
+
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const particleColors = ['#ffffff', '#fff0f5', '#f8bbd0', '#e91e63', '#ffd700'];
+      for (let i = 0; i < 800; i++) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const size = Math.random() * 1.8 + 0.4;
+        ctx.fillStyle = particleColors[Math.floor(Math.random() * particleColors.length)];
+        ctx.globalAlpha = Math.random() * 0.9 + 0.1;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1.0;
+    }
+
+    initGlitter();
+
+    let isScratching = false;
+
+    function scratch(e) {
+      if (!isScratching) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+      const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(x, y, 16, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    canvas.addEventListener('mousedown', () => isScratching = true);
+    canvas.addEventListener('mouseup', () => isScratching = false);
+    canvas.addEventListener('mousemove', scratch);
+    canvas.addEventListener('touchstart', () => isScratching = true);
+    canvas.addEventListener('touchend', () => isScratching = false);
+    canvas.addEventListener('touchmove', scratch);
+
+    // Live Countdown Timer
+    const weddingDate = new Date('October 23, 2026 18:00:00').getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const distance = weddingDate - now;
+
+      if (distance < 0) return;
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((distance % (1000 * 60)) / 1000);
+
+      document.getElementById('cd-days').innerText = String(days).padStart(2, '0');
+      document.getElementById('cd-hours').innerText = String(hours).padStart(2, '0');
+      document.getElementById('cd-mins').innerText = String(mins).padStart(2, '0');
+      document.getElementById('cd-secs').innerText = String(secs).padStart(2, '0');
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+  </script>
+</body>
+</html>

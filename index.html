@@ -710,7 +710,7 @@
       if (firstSection) firstSection.classList.add('animate-in');
     }
 
-    // Scratch Card Canvas, Minimal Demo Loop & Confetti
+    // Scratch Card Canvas, Minimal Demo Loop, Party Popper SFX & Confetti
     const canvas = document.getElementById('scratch-canvas');
     const ctx = canvas.getContext('2d');
     const demoPointer = document.getElementById('demo-hand-pointer');
@@ -756,22 +756,18 @@
 
       demoProgress += 0.02;
       
-      // Small tight central movement path
       const x = 70 + (Math.sin(demoProgress * 2) * 20);
       const y = 70 + (Math.cos(demoProgress * 3) * 8);
 
-      // Patli line (4px radius) erasing to avoid revealing main text
       ctx.globalCompositeOperation = 'destination-out';
       ctx.beginPath();
       ctx.arc(x, y, 4, 0, Math.PI * 2);
       ctx.fill();
 
-      // Finger Position
       if (demoPointer) {
         demoPointer.style.transform = `translate(${x - 6}px, ${y - 4}px) scale(0.95)`;
       }
 
-      // Loop Reset
       if (demoProgress >= Math.PI * 2) {
         demoProgress = 0;
         initGlitter();
@@ -787,6 +783,58 @@
         userInteracted = true;
         if (demoAnimFrame) cancelAnimationFrame(demoAnimFrame);
         if (demoPointer) demoPointer.classList.add('hidden');
+      }
+    }
+
+    function playPartyPopperSound() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctxAudio = new AudioContext();
+
+        // 1. Party Pop Noise Burst
+        const bufferSize = ctxAudio.sampleRate * 0.15;
+        const buffer = ctxAudio.createBuffer(1, bufferSize, ctxAudio.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = ctxAudio.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = ctxAudio.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 1000;
+        filter.Q.value = 3;
+
+        const gainNoise = ctxAudio.createGain();
+        gainNoise.gain.setValueAtTime(1, ctxAudio.currentTime);
+        gainNoise.gain.exponentialRampToValueAtTime(0.01, ctxAudio.currentTime + 0.12);
+
+        noise.connect(filter);
+        filter.connect(gainNoise);
+        gainNoise.connect(ctxAudio.destination);
+
+        // 2. High Frequency Whistle/Sizzle
+        const osc = ctxAudio.createOscillator();
+        const gainOsc = ctxAudio.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(800, ctxAudio.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(120, ctxAudio.currentTime + 0.2);
+
+        gainOsc.gain.setValueAtTime(0.8, ctxAudio.currentTime);
+        gainOsc.gain.exponentialRampToValueAtTime(0.01, ctxAudio.currentTime + 0.2);
+
+        osc.connect(gainOsc);
+        gainOsc.connect(ctxAudio.destination);
+
+        noise.start();
+        osc.start();
+        noise.stop(ctxAudio.currentTime + 0.15);
+        osc.stop(ctxAudio.currentTime + 0.2);
+      } catch (e) {
+        console.log("Audio FX error:", e);
       }
     }
 
@@ -810,6 +858,9 @@
     }
 
     function triggerPartyBomber() {
+      // Play Party Popper Sound Effect
+      playPartyPopperSound();
+
       if (typeof confetti === 'function') {
         const duration = 2.5 * 1000;
         const animationEnd = Date.now() + duration;

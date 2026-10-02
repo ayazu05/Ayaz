@@ -256,82 +256,23 @@
       touch-action: none;
     }
 
-    /* Professional Scratch Demo Tutorial Overlay */
-    .scratch-demo-hint {
+    /* Interactive Animated Pointer Icon */
+    #demo-hand-pointer {
       position: absolute;
+      z-index: 4;
+      pointer-events: none;
+      color: #ffffff;
+      font-size: 1.6rem;
+      filter: drop-shadow(0px 2px 5px rgba(0,0,0,0.7));
+      transition: opacity 0.3s ease;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 3;
-      pointer-events: none;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      transition: opacity 0.5s ease, visibility 0.5s;
+      display: block;
     }
 
-    .scratch-demo-hint.hidden {
+    #demo-hand-pointer.hidden {
       opacity: 0;
-      visibility: hidden;
-    }
-
-    .hand-icon-wrapper {
-      position: absolute;
-      top: 45%;
-      left: 20%;
-      color: #ffffff;
-      font-size: 1.8rem;
-      filter: drop-shadow(0px 3px 6px rgba(0,0,0,0.6));
-      animation: professionalSwipe 2.2s infinite ease-in-out;
-    }
-
-    .hint-pill-badge {
-      position: absolute;
-      bottom: 25px;
-      background: rgba(0, 0, 0, 0.45);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      color: #ffffff;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      animation: pulseBadge 2s infinite ease-in-out;
-    }
-
-    @keyframes professionalSwipe {
-      0% {
-        transform: translate(0, 0) rotate(0deg) scale(0.9);
-        opacity: 0.2;
-      }
-      20% {
-        opacity: 1;
-        transform: translate(5px, -5px) scale(1.1);
-      }
-      50% {
-        transform: translate(80px, 15px) rotate(-15deg) scale(1);
-        opacity: 1;
-      }
-      80% {
-        transform: translate(110px, -10px) rotate(10deg) scale(0.95);
-        opacity: 1;
-      }
-      100% {
-        transform: translate(120px, 0) rotate(0deg) scale(0.9);
-        opacity: 0;
-      }
-    }
-
-    @keyframes pulseBadge {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
+      display: none;
     }
 
     .scratch-reveal-content {
@@ -591,12 +532,9 @@
         <div class="scratch-container">
           <canvas id="scratch-canvas" width="180" height="160"></canvas>
           
-          <!-- Professional Animated Scratch Hint -->
-          <div class="scratch-demo-hint" id="scratch-hint">
-            <div class="hand-icon-wrapper">
-              <i class="fas fa-hand-pointer"></i>
-            </div>
-            <div class="hint-pill-badge">Scratch Here</div>
+          <!-- Animated Demo Pointer Icon -->
+          <div id="demo-hand-pointer">
+            <i class="fas fa-hand-pointer"></i>
           </div>
 
           <div class="scratch-reveal-content">
@@ -669,7 +607,7 @@
     const mainBgVid = document.getElementById('bg-video-main');
     let isOpened = false;
 
-    // Background music plays exactly once (no loop)
+    // Background music plays exactly once
     if (bgMusic) {
       bgMusic.loop = false;
     }
@@ -772,13 +710,17 @@
       if (firstSection) firstSection.classList.add('animate-in');
     }
 
-    // Scratch Card Logic, Demo Hint Hide & Party Bomber Effect
+    // Scratch Card Canvas, Live Demo Loop & Confetti
     const canvas = document.getElementById('scratch-canvas');
     const ctx = canvas.getContext('2d');
-    const scratchHint = document.getElementById('scratch-hint');
+    const demoPointer = document.getElementById('demo-hand-pointer');
     let confettiTriggered = false;
+    let isScratching = false;
+    let userInteracted = false;
+    let demoAnimFrame = null;
 
     function initGlitter() {
+      ctx.globalCompositeOperation = 'source-over';
       const grad = ctx.createRadialGradient(
         canvas.width / 2, canvas.height / 3, 10,
         canvas.width / 2, canvas.height / 2, 110
@@ -807,7 +749,47 @@
 
     initGlitter();
 
-    let isScratching = false;
+    // Dynamic Live Scratch Loop Demonstration
+    let demoProgress = 0;
+    function runLiveDemoAnimation() {
+      if (userInteracted) return;
+
+      demoProgress += 0.015;
+      
+      // Calculate smooth S-curve / wave path over heart centre
+      const x = 45 + (Math.sin(demoProgress * 3) * 45) + 45;
+      const y = 50 + (Math.cos(demoProgress * 2) * 20) + 25;
+
+      // Erase canvas surface live to reveal underlying date
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(x, y, 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Position pointer icon on top of drawing path
+      if (demoPointer) {
+        demoPointer.style.transform = `translate(${x - 8}px, ${y - 5}px) scale(1.1)`;
+      }
+
+      // Loop Cycle reset after reveal
+      if (demoProgress >= Math.PI * 2) {
+        demoProgress = 0;
+        initGlitter(); // Cover back
+      }
+
+      demoAnimFrame = requestAnimationFrame(runLiveDemoAnimation);
+    }
+
+    // Start Live Scratch Demonstration Loop
+    demoAnimFrame = requestAnimationFrame(runLiveDemoAnimation);
+
+    function stopDemoLoop() {
+      if (!userInteracted) {
+        userInteracted = true;
+        if (demoAnimFrame) cancelAnimationFrame(demoAnimFrame);
+        if (demoPointer) demoPointer.classList.add('hidden');
+      }
+    }
 
     function checkScratchPercentage() {
       if (confettiTriggered) return;
@@ -852,11 +834,7 @@
 
     function scratch(e) {
       if (!isScratching) return;
-
-      // Hide demo hint gracefully on first interaction
-      if (scratchHint && !scratchHint.classList.contains('hidden')) {
-        scratchHint.classList.add('hidden');
-      }
+      stopDemoLoop();
 
       const rect = canvas.getBoundingClientRect();
       const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
@@ -870,12 +848,12 @@
       checkScratchPercentage();
     }
 
-    canvas.addEventListener('mousedown', () => isScratching = true);
+    canvas.addEventListener('mousedown', (e) => { isScratching = true; stopDemoLoop(); });
     canvas.addEventListener('mouseup', () => isScratching = false);
     canvas.addEventListener('mousemove', scratch);
-    canvas.addEventListener('touchstart', () => isScratching = true);
+    canvas.addEventListener('touchstart', (e) => { isScratching = true; stopDemoLoop(); }, { passive: true });
     canvas.addEventListener('touchend', () => isScratching = false);
-    canvas.addEventListener('touchmove', scratch);
+    canvas.addEventListener('touchmove', scratch, { passive: true });
 
     // Live Countdown Timer
     const weddingDate = new Date('December 07, 2026 18:00:00').getTime();

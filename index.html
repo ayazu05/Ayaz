@@ -236,6 +236,24 @@
       font-weight: 600;
     }
 
+    /* Scratch to Reveal Glowing Animation */
+    .glowing-scratch-title {
+      animation: glowFade 2.2s infinite ease-in-out;
+    }
+
+    @keyframes glowFade {
+      0%, 100% {
+        opacity: 0.75;
+        text-shadow: 0 0 2px rgba(90, 14, 23, 0.2);
+        transform: scale(1);
+      }
+      50% {
+        opacity: 1;
+        text-shadow: 0 0 10px rgba(139, 38, 62, 0.7), 0 0 20px rgba(255, 255, 255, 0.9), 0 0 30px rgba(139, 38, 62, 0.5);
+        transform: scale(1.03);
+      }
+    }
+
     /* Scratch Container */
     .scratch-container {
       position: relative;
@@ -528,7 +546,7 @@
       </section>
 
       <section class="invitation-section" data-bg="bg-video-main">
-        <h2 class="section-title">Scratch to Reveal</h2>
+        <h2 class="section-title glowing-scratch-title">Scratch to Reveal</h2>
         <div class="scratch-container">
           <canvas id="scratch-canvas" width="180" height="160"></canvas>
           

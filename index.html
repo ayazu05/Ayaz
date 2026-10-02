@@ -256,36 +256,82 @@
       touch-action: none;
     }
 
-    /* Scratch Demo Hint Overlay */
+    /* Professional Scratch Demo Tutorial Overlay */
     .scratch-demo-hint {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       z-index: 3;
       pointer-events: none;
       display: flex;
       flex-direction: column;
+      justify-content: center;
       align-items: center;
+      transition: opacity 0.5s ease, visibility 0.5s;
+    }
+
+    .scratch-demo-hint.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .hand-icon-wrapper {
+      position: absolute;
+      top: 45%;
+      left: 20%;
       color: #ffffff;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+      font-size: 1.8rem;
+      filter: drop-shadow(0px 3px 6px rgba(0,0,0,0.6));
+      animation: professionalSwipe 2.2s infinite ease-in-out;
+    }
+
+    .hint-pill-badge {
+      position: absolute;
+      bottom: 25px;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #ffffff;
+      padding: 4px 12px;
+      border-radius: 20px;
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 0.75rem;
+      font-size: 0.65rem;
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
-      animation: swipeDemo 1.8s infinite ease-in-out;
-      transition: opacity 0.4s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      animation: pulseBadge 2s infinite ease-in-out;
     }
 
-    .scratch-demo-hint i {
-      font-size: 1.4rem;
-      margin-bottom: 4px;
+    @keyframes professionalSwipe {
+      0% {
+        transform: translate(0, 0) rotate(0deg) scale(0.9);
+        opacity: 0.2;
+      }
+      20% {
+        opacity: 1;
+        transform: translate(5px, -5px) scale(1.1);
+      }
+      50% {
+        transform: translate(80px, 15px) rotate(-15deg) scale(1);
+        opacity: 1;
+      }
+      80% {
+        transform: translate(110px, -10px) rotate(10deg) scale(0.95);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(120px, 0) rotate(0deg) scale(0.9);
+        opacity: 0;
+      }
     }
 
-    @keyframes swipeDemo {
-      0%, 100% { transform: translate(-50%, -50%) scale(0.95) rotate(-5deg); }
-      50% { transform: translate(-30%, -40%) scale(1.1) rotate(10deg); }
+    @keyframes pulseBadge {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
     }
 
     .scratch-reveal-content {
@@ -504,7 +550,7 @@
 </head>
 <body>
 
-  <!-- Audio Control Button (No loop attribute applied) -->
+  <!-- Audio Control Button -->
   <button id="audio-control" onclick="toggleAudio()">
     <i id="audio-icon" class="fas fa-music"></i>
   </button>
@@ -544,10 +590,15 @@
         <h2 class="section-title">Scratch to Reveal</h2>
         <div class="scratch-container">
           <canvas id="scratch-canvas" width="180" height="160"></canvas>
+          
+          <!-- Professional Animated Scratch Hint -->
           <div class="scratch-demo-hint" id="scratch-hint">
-            <i class="fas fa-hand-pointer"></i>
-            <span>Scratch Here</span>
+            <div class="hand-icon-wrapper">
+              <i class="fas fa-hand-pointer"></i>
+            </div>
+            <div class="hint-pill-badge">Scratch Here</div>
           </div>
+
           <div class="scratch-reveal-content">
             <i class="fas fa-calendar-heart" style="font-size:1.2rem; color:var(--text-burgundy); margin-bottom:4px;"></i>
             <h3>Nikah Ceremony</h3>
@@ -618,7 +669,7 @@
     const mainBgVid = document.getElementById('bg-video-main');
     let isOpened = false;
 
-    // Explicitly disable looping so music plays exactly once
+    // Background music plays exactly once (no loop)
     if (bgMusic) {
       bgMusic.loop = false;
     }
@@ -802,9 +853,9 @@
     function scratch(e) {
       if (!isScratching) return;
 
-      // Hide demo hint on first scratch action
-      if (scratchHint && scratchHint.style.opacity !== '0') {
-        scratchHint.style.opacity = '0';
+      // Hide demo hint gracefully on first interaction
+      if (scratchHint && !scratchHint.classList.contains('hidden')) {
+        scratchHint.classList.add('hidden');
       }
 
       const rect = canvas.getBoundingClientRect();

@@ -256,14 +256,14 @@
       touch-action: none;
     }
 
-    /* Interactive Animated Pointer Icon */
+    /* Animated Pointer Icon */
     #demo-hand-pointer {
       position: absolute;
       z-index: 4;
       pointer-events: none;
       color: #ffffff;
-      font-size: 1.6rem;
-      filter: drop-shadow(0px 2px 5px rgba(0,0,0,0.7));
+      font-size: 1.4rem;
+      filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.6));
       transition: opacity 0.3s ease;
       top: 0;
       left: 0;
@@ -710,7 +710,7 @@
       if (firstSection) firstSection.classList.add('animate-in');
     }
 
-    // Scratch Card Canvas, Live Demo Loop & Confetti
+    // Scratch Card Canvas, Minimal Demo Loop & Confetti
     const canvas = document.getElementById('scratch-canvas');
     const ctx = canvas.getContext('2d');
     const demoPointer = document.getElementById('demo-hand-pointer');
@@ -749,38 +749,37 @@
 
     initGlitter();
 
-    // Dynamic Live Scratch Loop Demonstration
+    // Minimal Subtle Scratch Demo Loop
     let demoProgress = 0;
     function runLiveDemoAnimation() {
       if (userInteracted) return;
 
-      demoProgress += 0.015;
+      demoProgress += 0.02;
       
-      // Calculate smooth S-curve / wave path over heart centre
-      const x = 45 + (Math.sin(demoProgress * 3) * 45) + 45;
-      const y = 50 + (Math.cos(demoProgress * 2) * 20) + 25;
+      // Small tight central movement path
+      const x = 70 + (Math.sin(demoProgress * 2) * 20);
+      const y = 70 + (Math.cos(demoProgress * 3) * 8);
 
-      // Erase canvas surface live to reveal underlying date
+      // Patli line (4px radius) erasing to avoid revealing main text
       ctx.globalCompositeOperation = 'destination-out';
       ctx.beginPath();
-      ctx.arc(x, y, 12, 0, Math.PI * 2);
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
       ctx.fill();
 
-      // Position pointer icon on top of drawing path
+      // Finger Position
       if (demoPointer) {
-        demoPointer.style.transform = `translate(${x - 8}px, ${y - 5}px) scale(1.1)`;
+        demoPointer.style.transform = `translate(${x - 6}px, ${y - 4}px) scale(0.95)`;
       }
 
-      // Loop Cycle reset after reveal
+      // Loop Reset
       if (demoProgress >= Math.PI * 2) {
         demoProgress = 0;
-        initGlitter(); // Cover back
+        initGlitter();
       }
 
       demoAnimFrame = requestAnimationFrame(runLiveDemoAnimation);
     }
 
-    // Start Live Scratch Demonstration Loop
     demoAnimFrame = requestAnimationFrame(runLiveDemoAnimation);
 
     function stopDemoLoop() {
